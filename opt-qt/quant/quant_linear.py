@@ -144,7 +144,7 @@ class QuantizedLinear(nn.Linear):
         traffic in bytes.
         """
         if x.dim() != 2:
-            raise ValueError("hardware_profiling only supports 2D input tensors")
+            x = x.reshape(-1, x.shape[-1])
 
         token_num, in_features = x.shape
         out_features = self.out_features
