@@ -151,10 +151,10 @@ class QuantizedLinear(nn.Linear):
 
         if HW == "Systolic":
             M, N, K = Systolic_HW_info()
-            external_memory_accesses, latency_cycles = Systolic_proxy(M, N, K, x, self.weight)
+            external_memory_accesses, compute_latency_ratio, latency_cycles = Systolic_proxy(M, N, K, x, self.weight)
         elif HW == "PAFCIM":
             M, N, K = PAFCIM_HW_info()
-            external_memory_accesses, latency_cycles = PAFCIM_proxy(M, N, K, x, self.weight)
+            external_memory_accesses, compute_latency_ratio, latency_cycles = PAFCIM_proxy(M, N, K, x, self.weight)
         else:
             raise ValueError(f"Unknown HW type: {HW}")
 
@@ -173,6 +173,7 @@ class QuantizedLinear(nn.Linear):
             "tile_depths": tile_depths,
             "macs": total_macs,
             "external_memory_accesses": external_memory_accesses,
+            "compute_latency_ratio": compute_latency_ratio,
             "latency_cycles": latency_cycles
         }
 
@@ -194,7 +195,10 @@ class QuantizedLinear(nn.Linear):
             Output tensor (quantized or not depending on mode)
         """
         # 
-        profile = self.hardware_profiling(x, HW="systolic")
+        profile = self.hardware_profiling(x, HW="Systolic")
+        print(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}")
+
+
         # Use stored stat_manager if not provided
         if stat_collector is None and hasattr(self, '_stat_manager'):
             stat_collector = self._stat_manager
