@@ -342,15 +342,6 @@ class QuantizedLinear(nn.Linear):
         if self.layer_name == "up_proj":
             if self.layer_idx == 1:
                 pass
-
-        out_ref = F.linear(x_ref, self.weight, self.bias).to(out.dtype)
-        mse = ((out - out_ref) ** 2).mean().item()
-        self.log_quant_error(
-            mse*100/out.abs().mean().item(),  # 相对误差百分比
-            layer_name=self.layer_name,
-            layer_idx=self.layer_idx,
-        )
-
         return out
     
     def _quant_forward_with_outlier(self, x, stat_collector=None):

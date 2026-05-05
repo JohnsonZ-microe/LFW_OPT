@@ -1,10 +1,6 @@
 """
 Main Entry Point for OPT Model Quantization Pipeline.
 
-This script provides a complete pipeline for:
-1. Calibration: Collect quantization scales
-2. Quantization: Apply quantization to the model
-3. Evaluation: Evaluate perplexity on test dataset
 
 Usage:
     python main.py --config config/Int8.yaml --model-path /path/to/opt-model
@@ -294,7 +290,6 @@ def evaluate(args, config, model):
 
     for name, result in results.items():
         print(f"\n{name}:")
-        print(f"  Perplexity: {result['perplexity']:.4f}")
         print(f"  Time: {result['time']:.2f}s")
 
     print("\n" + "=" * 80)
