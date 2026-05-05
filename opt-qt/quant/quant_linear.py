@@ -197,7 +197,8 @@ class QuantizedLinear(nn.Linear):
         # Only execute hardware profiling when called from single_sample_inference.py
         if self._is_single_sample_inference():
             profile = self.hardware_profiling(x, HW="Systolic")
-            print(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}")
+            with open("D:/FOCUS/HPCA2026/LFW_OPT/opt-qt/quant/quant_linear.py/hardware_profiling.log", "a") as f:
+                f.write(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}\n")
 
 
         # Use stored stat_manager if not provided
