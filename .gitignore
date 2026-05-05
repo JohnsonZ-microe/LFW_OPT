@@ -1,0 +1,15 @@
+# Ignore large downloaded models and weights
+models/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Jupyter and VS Code
+.ipynb_checkpoints/
+.vscode/
+
+# OS artifacts
+.DS_Store

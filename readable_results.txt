@@ -1,0 +1,20 @@
+Model & Config                                     | Sparsity        | SignMagRatio    | Perplexity
+------------------------------------------------------------------------------------------------
+opt_1.3b_linear_matmul_int8.yaml                   | 93.8723%        | 89.3712%        | 2794.4136 
+opt_1.3b_linear_matmul_int12.yaml                  | 87.8111%        | 85.5694%        | 14.4829   
+opt_1.3b_linear_matmul_int16.yaml                  | 83.9118%        | 83.9524%        | 14.4613   
+opt_6.7b_linear_matmul_int8.yaml                   | 96.8835%        | 93.4337%        | 5129.3496 
+opt_6.7b_linear_matmul_int12.yaml                  | 89.7563%        | 87.2838%        | 11.7016   
+opt_6.7b_linear_matmul_int16.yaml                  | 85.3770%        | 84.7716%        | 11.7020   
+opt_13b_linear_matmul_int8.yaml                    | 95.5750%        | 91.1365%        | 4254.1489 
+opt_13b_linear_matmul_int12.yaml                   | 90.2942%        | 87.8187%        | 12.8246   
+opt_13b_linear_matmul_int16.yaml                   | 85.8113%        | 85.1606%        | 11.1813   
+qwen2_1.5b_linear_matmul_int8.yaml                 | 91.8914%        | 84.7653%        | 119708792.0000
+qwen2_1.5b_linear_matmul_int12.yaml                | 82.9385%        | 78.6708%        | 4443.0044 
+qwen2_1.5b_linear_matmul_int16.yaml                | 76.7516%        | 75.8758%        | 12.0299   
+qwen2_7b_linear_matmul_int8.yaml                   | 94.4252%        | 87.5236%        | 7197296.5000
+qwen2_7b_linear_matmul_int12.yaml                  | 84.6226%        | 80.0451%        | 7181.5503 
+qwen2_7b_linear_matmul_int16.yaml                  | 78.8465%        | 77.4801%        | 9.7004    
+qwen2_14b_linear_matmul_int8.yaml                  | 93.0752%        | 83.4580%        | 15482687.0000
+qwen2_14b_linear_matmul_int12.yaml                 | 83.1110%        | 78.6010%        | 1317.3687 
+qwen2_14b_linear_matmul_int16.yaml                 | 76.2402%        | 75.1792%        | 7.9321    
