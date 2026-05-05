@@ -15,8 +15,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Tuple, Dict
 from .utils import Round, LINEAR_SHIFT_NUM
-from .HW_proxy.PAFCIM_proxy import PAFCIM_proxy
-from .HW_proxy.Systolic_proxy import Systolic_HW_info, Systolic_proxy    
+from ..HW_proxy.PAFCIM_proxy import PAFCIM_proxy
+from ..HW_proxy.Systolic_proxy import Systolic_HW_info, Systolic_proxy    
 
 
 class QuantizedLinear(nn.Linear):
