@@ -15,6 +15,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Tuple, Dict
 from .utils import Round, LINEAR_SHIFT_NUM
+from .HW_proxy.PAFCIM_proxy import PAFCIM_proxy
+from .HW_proxy.Systolic_proxy import Systolic_HW_info, Systolic_proxy    
 
 
 class QuantizedLinear(nn.Linear):
@@ -125,6 +127,52 @@ class QuantizedLinear(nn.Linear):
         self._calibration_action_cache = action
         return action
 
+    def hardware_profiling(
+        self,
+        x: torch.Tensor,
+        HW: str = "Systolic",
+    ) -> Dict[str, int]:
+        """Profile tiled hardware cost for a linear forward.
+
+        The input matrix x is split into tiles of shape [M, K], and the weight
+        matrix is split into tiles of shape [K, N] to form output tiles of
+        shape [M, N].
+
+        Returns a dictionary containing estimated operation count and memory
+        traffic in bytes.
+        """
+        if x.dim() != 2:
+            raise ValueError("hardware_profiling only supports 2D input tensors")
+        if M <= 0 or N <= 0 or K <= 0:
+            raise ValueError("Tile dimensions M, N, K must be positive integers")
+
+        token_num, in_features = x.shape
+        out_features = self.out_features
+
+        if HW == "Systolic":
+            M, N, K = Systolic_HW_info()
+        if HW == "PAFCIM":
+            M, N, K = PAFCIM_HW_info()
+        
+        tile_rows = (token_num + M - 1) // M
+        tile_cols = (out_features + N - 1) // N
+        tile_depths = (in_features + K - 1) // K
+
+        total_macs = token_num * out_features * in_features
+        
+        if HW == "Systolic":
+            external_memory_accesses, latency_cycles = Systolic_proxy(M, N, K)
+
+        if HW == "PAFCIM":
+            external_memory_accesses, latency_cycles = PAFCIM_proxy(M, N, K, x, self.weight)
+        return {
+            "tile_rows": tile_rows,
+            "tile_cols": tile_cols,
+            "tile_depths": tile_depths,
+            "macs": total_macs,
+            "external_memory_accesses": external_memory_accesses,
+            "latency_cycles": latency_cycles
+        }
 
     def forward(
         self, 
@@ -345,7 +393,6 @@ class QuantizedLinear(nn.Linear):
         out_quant = out_quant.mul_(M0)
         out_quant = torch.div(out_quant, LINEAR_SHIFT_NUM, rounding_mode='floor')
 
-    
         out_fp_a = F.linear(x_fp, w_fp, None)
         a1   = torch.div((F.linear(x_sim_fp32, w_fp, None)).mul_(M2), LINEAR_SHIFT_NUM)       # outlier_x @ normal_W（FP精度）
         a2   = torch.div((F.linear(x_fp, w_sim_fp32, None)).mul_(M3), LINEAR_SHIFT_NUM)
