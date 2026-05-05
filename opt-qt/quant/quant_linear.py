@@ -8,15 +8,17 @@ This module provides a quantized linear layer that supports:
 """
 
 import os
+import sys
+sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import pickle
-from tkinter import W
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Tuple, Dict
-from .utils import Round, LINEAR_SHIFT_NUM
-from ..HW_proxy.PAFCIM_proxy import PAFCIM_proxy
-from ..HW_proxy.Systolic_proxy import Systolic_HW_info, Systolic_proxy    
+from utils import Round, LINEAR_SHIFT_NUM
+from HW_proxy.PAFCIM_proxy import PAFCIM_proxy
+from HW_proxy.Systolic_proxy import Systolic_HW_info, Systolic_proxy    
 
 
 class QuantizedLinear(nn.Linear):
@@ -143,28 +145,28 @@ class QuantizedLinear(nn.Linear):
         """
         if x.dim() != 2:
             raise ValueError("hardware_profiling only supports 2D input tensors")
-        if M <= 0 or N <= 0 or K <= 0:
-            raise ValueError("Tile dimensions M, N, K must be positive integers")
 
         token_num, in_features = x.shape
         out_features = self.out_features
 
         if HW == "Systolic":
             M, N, K = Systolic_HW_info()
-        if HW == "PAFCIM":
+            external_memory_accesses, latency_cycles = Systolic_proxy(M, N, K, x, self.weight)
+        elif HW == "PAFCIM":
             M, N, K = PAFCIM_HW_info()
-        
+            external_memory_accesses, latency_cycles = PAFCIM_proxy(M, N, K, x, self.weight)
+        else:
+            raise ValueError(f"Unknown HW type: {HW}")
+
+        if M <= 0 or N <= 0 or K <= 0:
+            raise ValueError("Tile dimensions M, N, K must be positive integers")
+
         tile_rows = (token_num + M - 1) // M
         tile_cols = (out_features + N - 1) // N
         tile_depths = (in_features + K - 1) // K
 
         total_macs = token_num * out_features * in_features
-        
-        if HW == "Systolic":
-            external_memory_accesses, latency_cycles = Systolic_proxy(M, N, K)
 
-        if HW == "PAFCIM":
-            external_memory_accesses, latency_cycles = PAFCIM_proxy(M, N, K, x, self.weight)
         return {
             "tile_rows": tile_rows,
             "tile_cols": tile_cols,
@@ -191,6 +193,8 @@ class QuantizedLinear(nn.Linear):
         Returns:
             Output tensor (quantized or not depending on mode)
         """
+        # 
+        profile = self.hardware_profiling(x, HW="systolic")
         # Use stored stat_manager if not provided
         if stat_collector is None and hasattr(self, '_stat_manager'):
             stat_collector = self._stat_manager
