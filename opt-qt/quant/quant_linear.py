@@ -194,9 +194,10 @@ class QuantizedLinear(nn.Linear):
         Returns:
             Output tensor (quantized or not depending on mode)
         """
-        # 
-        profile = self.hardware_profiling(x, HW="Systolic")
-        print(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}")
+        # Only execute hardware profiling when called from single_sample_inference.py
+        if self._is_single_sample_inference():
+            profile = self.hardware_profiling(x, HW="Systolic")
+            print(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}")
 
 
         # Use stored stat_manager if not provided

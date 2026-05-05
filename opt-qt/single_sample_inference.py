@@ -29,6 +29,15 @@ from tqdm import tqdm
 from quant.quant_linear import QuantizedLinear
 from quant.quant_matmul import QuantizedMatMul
 
+def enable_single_sample_inference_for_quantized_linear():
+    def _is_single_sample_inference(self):
+        return True
+
+    QuantizedLinear._is_single_sample_inference = _is_single_sample_inference
+
+
+enable_single_sample_inference_for_quantized_linear()
+
 def validate_reuse_layers_have_scales(model):
     missing = []
     for m in model.modules():
