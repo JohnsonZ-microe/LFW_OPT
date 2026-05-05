@@ -1,0 +1,118 @@
+model:
+  name: opt-1.3b
+  path: /home/zyzhao/lfw_opt/models/opt-1.3b
+  num_layers: 24
+quantization:
+  enabled: true
+  mode: quant_forward
+  scale_dir: /home/zyzhao/lfw_opt/opt-qt/quant_scale/Int8_qkv12/
+
+  calibration_policy:
+    default: auto              # auto | reuse | recalibrate
+    layer_policy:
+      q_proj: reuse
+      k_proj: reuse
+      v_proj: reuse
+      out_proj: reuse
+      fc1: reuse
+      fc2: reuse
+      qk_matmul: reuse
+      pv_matmul: reuse
+      lm_head: reuse
+  per_layer_policy: {}
+
+  q_proj:
+    a_bit: 8
+    w_bit: 8
+    o_bit: 12
+    d_bit: 4
+    outlier_ratio: 0.01   # 新增
+    p: 4
+  k_proj:
+    a_bit: 8
+    w_bit: 8
+    o_bit: 12
+    d_bit: 4
+    outlier_ratio: 0.01   # 新增
+    p: 4
+  v_proj:
+    a_bit: 8
+    w_bit: 8
+    o_bit: 12
+    d_bit: 4
+    outlier_ratio: 0.01   # 新增
+    p: 4
+  out_proj:
+    a_bit: 8
+    w_bit: 8
+    o_bit: 12
+    outlier_ratio: 0.01   # 新增
+    d_bit: 4
+    p: 4
+  fc1:
+    a_bit: 12
+    w_bit: 12
+    o_bit: 12
+    outlier_ratio: 0   # 新增
+    d_bit: 4
+    p: 4
+  fc2:
+    a_bit: 12
+    w_bit: 12
+    o_bit: 12
+    outlier_ratio: 0   # 新增
+    d_bit: 4
+    p: 4
+  lm_head:
+    enabled: true
+    a_bit: 8
+    w_bit: 8
+    o_bit: 12
+    outlier_ratio: 0.01   # 新增
+    d_bit: 4
+    p: 4
+  qk_matmul:
+    A_bit: 8
+    B_bit: 8
+    O_bit: 12
+    outlier_ratio: 0.015   # 新增
+    d_bit: 4
+    p: 4
+  pv_matmul:
+    A_bit: 8
+    B_bit: 8
+    O_bit: 12
+    outlier_ratio: 0.015   # 新增
+    d_bit: 4
+    p: 4
+calibration:
+  dataset: wikitext
+  dataset_config: wikitext-2-raw-v1
+  split: test
+  num_samples: 128
+  seq_length: 2048
+  batch_size: 1
+  seed: 23
+evaluation:
+  datasets:
+  - name: wikitext
+    config: wikitext-2-raw-v1
+    split: test
+  metrics:
+  - perplexity
+  - accuracy
+  batch_size: 1
+  max_samples: -1
+generation:
+  max_length: 100
+  temperature: 1.0
+  top_k: 50
+  top_p: 0.95
+  do_sample: true
+  num_return_sequences: 1
+logging:
+  level: INFO
+  log_dir: ./logs
+  tensorboard: false
+  wandb: false
+  wandb_project: opt-quantization

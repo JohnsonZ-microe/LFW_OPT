@@ -1,0 +1,118 @@
+# Mixed Precision Quantization Configuration for OPT Model
+# Critical layers use higher precision, others use lower precision
+
+model:
+  name: "opt-1.3b"
+  path: "/home/zyzhao/lfw_opt/models/opt-1.3b"
+  num_layers: 24
+
+quantization:
+  enabled: true
+  mode: "quant_forward"
+  scale_dir: "/home/zyzhao/lfw_opt/opt-qt/quant_scale/Mixed/"
+  
+  # Attention projection layers - mixed precision
+  q_proj:
+    a_bit: 8
+    w_bit: 6  # Medium precision for query
+    o_bit: 8
+    d_bit: 4
+    p: 4
+  
+  k_proj:
+    a_bit: 8
+    w_bit: 6  # Medium precision for key
+    o_bit: 8
+    d_bit: 4
+    p: 4
+  
+  v_proj:
+    a_bit: 8
+    w_bit: 8  # Higher precision for value
+    o_bit: 8
+    d_bit: 4
+    p: 4
+  
+  out_proj:
+    a_bit: 8
+    w_bit: 6  # Medium precision for output projection
+    o_bit: 8
+    d_bit: 4
+    p: 4
+  
+  # Feed-forward layers - lower precision
+  fc1:
+    a_bit: 8
+    w_bit: 4  # Lower precision for fc1
+    o_bit: 8
+    d_bit: 4
+    p: 4
+  
+  fc2:
+    a_bit: 8
+    w_bit: 4  # Lower precision for fc2
+    o_bit: 8
+    d_bit: 4
+    p: 4
+  
+  # LM Head - highest precision
+  lm_head:
+    enabled: true
+    a_bit: 8
+    w_bit: 8
+    o_bit: 8
+    d_bit: 4
+    p: 4
+  
+  # Matrix multiplication operations - higher precision
+  qk_matmul:
+    A_bit: 8
+    B_bit: 8
+    O_bit: 10
+    d_bit: 4
+    p: 4
+  
+  pv_matmul:
+    A_bit: 10
+    B_bit: 8
+    O_bit: 8
+    d_bit: 4
+    p: 4
+
+calibration:
+  dataset: "wikitext"
+  dataset_config: "wikitext-2-raw-v1"
+  split: "train"
+  num_samples: 128
+  seq_length: 2048
+  batch_size: 1
+  seed: 42
+
+evaluation:
+  datasets:
+    - name: "wikitext"
+      config: "wikitext-2-raw-v1"
+      split: "test"
+    - name: "lambada"
+      config: "default"
+      split: "test"
+  metrics:
+    - "perplexity"
+    - "accuracy"
+  batch_size: 1
+  max_samples: -1
+
+generation:
+  max_length: 100
+  temperature: 1.0
+  top_k: 50
+  top_p: 0.95
+  do_sample: true
+  num_return_sequences: 1
+
+logging:
+  level: "INFO"
+  log_dir: "./logs"
+  tensorboard: false
+  wandb: false
+

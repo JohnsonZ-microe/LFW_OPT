@@ -1,0 +1,139 @@
+model:
+  name: opt-6.7b
+  family: opt
+  path: /home/zyzhao/lfw_opt/models/opt-6.7b
+  num_layers: 32
+
+  attn_implementation: eager
+
+quantization:
+  enabled: true
+  mode: quant_forward
+  model_family: opt
+
+  quantize_linear: true
+  quantize_matmul: true
+
+  scale_dir: /home/zyzhao/lfw_opt/opt-qt/quant_scale/opt-6.7b/linear_matmul_int16_fineweb/
+
+  calibration_policy:
+    default: auto
+    layer_policy:
+      q_proj: recalibrate
+      k_proj: recalibrate
+      v_proj: recalibrate
+      out_proj: recalibrate
+      fc1: recalibrate
+      fc2: recalibrate
+      qk_matmul: recalibrate
+      pv_matmul: recalibrate
+
+  per_layer_policy: {}
+
+  q_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  k_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  v_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  out_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  fc1:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  fc2:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  qk_matmul:
+    A_bit: 16
+    B_bit: 16
+    O_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  pv_matmul:
+    A_bit: 16
+    B_bit: 16
+    O_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  lm_head:
+    enabled: false
+
+calibration:
+  dataset: HuggingFaceFW/fineweb
+  dataset_config: sample-10BT
+  split: train
+  streaming: true
+  text_column: text
+  min_text_tokens: 128
+
+  num_samples: 64
+  seq_length: 2048
+  batch_size: 1
+  seed: 23
+
+evaluation:
+  seq_length: 2048
+  max_eval_tokens: 65536
+  min_doc_tokens: 128
+  datasets:
+    - name: HuggingFaceFW/fineweb
+      config: sample-10BT
+      split: train
+      streaming: true
+      text_column: text
+      max_eval_tokens: 65536
+      min_doc_tokens: 128
+
+generation:
+  max_length: 100
+  temperature: 1.0
+  top_k: 50
+  top_p: 0.95
+  do_sample: true
+  num_return_sequences: 1
+
+logging:
+  level: INFO
+  log_dir: ./logs
+  tensorboard: false
+  wandb: false
+  wandb_project: opt-quantization

@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Model files (don't commit large model files)
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Quantization scales (generated during calibration)
+quant_scale/**/*.p
+quant_scale/**/*.pkl
+quant_scale/**/*.npy
+quant_scale/**/*.json
+quant_scale/vis/
+
+# Keep directory structure
+!quant_scale/*/.gitkeep
+
+# Quantization error logs (generated during inference)
+quant-error/
+
+# Logs
+*.log
+logs/
+wandb/
+tensorboard/
+
+# Data cache
+data/cache/
+data/downloads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Model outputs
+outputs/
+results/

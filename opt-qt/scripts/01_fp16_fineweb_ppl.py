@@ -1,0 +1,47 @@
+import sys
+import os
+# 将当前文件所在目录的上一级目录(即opt-qt)添加到 sys.path 中
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import argparse
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from evaluation.finweb_ppl import evaluate_fineweb_ppl
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model-path", required=True)
+    ap.add_argument("--seq-length", type=int, default=4096)
+    ap.add_argument("--max-eval-tokens", type=int, default=262144)
+    ap.add_argument("--device", default="cuda")
+    ap.add_argument("--attn-implementation", default=None)
+    args = ap.parse_args()
+
+    tokenizer = AutoTokenizer.from_pretrained(args.model_path, trust_remote_code=True)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    load_kwargs = dict(
+        torch_dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16,
+        device_map="auto",
+        trust_remote_code=True,
+    )
+    if args.attn_implementation:
+        load_kwargs["attn_implementation"] = args.attn_implementation
+
+    model = AutoModelForCausalLM.from_pretrained(args.model_path, **load_kwargs)
+
+    ppl = evaluate_fineweb_ppl(
+        model=model,
+        tokenizer=tokenizer,
+        seq_length=args.seq_length,
+        max_eval_tokens=args.max_eval_tokens,
+        device=args.device,
+    )
+
+    print(f"FineWeb FP baseline PPL = {ppl:.4f}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,158 @@
+model:
+  name: qwen2.5-7b
+  family: qwen2
+  path: /home/zyzhao/lfw_opt/models/Qwen2.5-7B
+  num_layers: 28
+
+  # MatMul 量化阶段必须用 eager。
+  # 否则可能走 SDPA / FlashAttention，qk_matmul 和 pv_matmul patch 不一定生效。
+  attn_implementation: eager
+
+quantization:
+  enabled: true
+  mode: quant_forward
+  model_family: qwen2
+
+  quantize_linear: true
+  quantize_matmul: true
+
+  # 新目录：Linear + MatMul 共用的 scale 目录。
+  # 先把 linear_int8_fineweb 里的 588 个 Linear scale 复制到这里，
+  # 然后本配置只新增 qk_matmul / pv_matmul 的 scale。
+  scale_dir: /home/zyzhao/lfw_opt/opt-qt/quant_scale/qwen2.5-7b/linear_matmul_int8_fineweb/
+
+  calibration_policy:
+    default: auto
+    layer_policy:
+      # Linear 已经在 linear_int8_fineweb 里校准过。
+      # 这里复制过来后直接复用。
+      q_proj: recalibrate
+      k_proj: recalibrate
+      v_proj: recalibrate
+      o_proj: recalibrate
+      gate_proj: recalibrate
+      up_proj: recalibrate
+      down_proj: recalibrate
+
+      # MatMul 是新增的，需要重新校准。
+      qk_matmul: recalibrate
+      pv_matmul: recalibrate
+
+  per_layer_policy: {}
+
+  q_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  k_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  v_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  o_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  gate_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  up_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  down_proj:
+    a_bit: 16
+    w_bit: 16
+    o_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  qk_matmul:
+    A_bit: 16
+    B_bit: 16
+    O_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  pv_matmul:
+    A_bit: 16
+    B_bit: 16
+    O_bit: 16
+    d_bit: 4
+    outlier_ratio: 0.0
+    p: 4
+
+  lm_head:
+    enabled: false
+
+calibration:
+  dataset: HuggingFaceFW/fineweb
+  dataset_config: sample-10BT
+  split: train
+  streaming: true
+  text_column: text
+  min_text_tokens: 128
+
+  # 第一轮先保持和 Linear-only 一样，便于对比。
+  num_samples: 64
+  seq_length: 4096
+  batch_size: 1
+  seed: 23
+
+evaluation:
+  seq_length: 4096
+  max_eval_tokens: 65536
+  min_doc_tokens: 128
+  datasets:
+    - name: HuggingFaceFW/fineweb
+      config: sample-10BT
+      split: train
+      streaming: true
+      text_column: text
+      max_eval_tokens: 65536
+      min_doc_tokens: 128
+
+generation:
+  max_length: 100
+  temperature: 1.0
+  top_k: 50
+  top_p: 0.95
+  do_sample: true
+  num_return_sequences: 1
+
+logging:
+  level: INFO
+  log_dir: ./logs
+  tensorboard: false
+  wandb: false
+  wandb_project: qwen-quantization
