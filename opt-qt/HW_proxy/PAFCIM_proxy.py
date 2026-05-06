@@ -146,8 +146,4 @@ def PAFCIM_proxy(
     total_latency = transfer_latency["transfer_cycles"] + compute_latency
     external_memory_accesses = w_tile_num*x.size(0)*x.size(1) + w.size(0)*w.size(1) + x.size(0)*w.size(0)  # output stationary dataflow
 
-    return {
-        "total_latency": total_latency,
-        "compute_latency_ratio": compute_latency_ratio,
-        "external_memory_accesses": external_memory_accesses
-    }
+    return external_memory_accesses, compute_latency_ratio, total_latency

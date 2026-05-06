@@ -298,6 +298,8 @@ def evaluate(args, config, model):
     torch.cuda.empty_cache()
 
 def main():
+    f = open('/home/zyzhao/lfw_opt/hardware_profiling.log', 'w', encoding="utf-8")
+
     """Main entry point."""
     args = parse_args()
     
