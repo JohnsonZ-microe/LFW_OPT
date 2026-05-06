@@ -206,13 +206,12 @@ class QuantizedLinear(nn.Linear):
             return self.scale_inspection(x, stat_collector)
         elif self.mode == "quant_forward":
             # Only execute hardware profiling when called from single_sample_inference.py
-            if self._is_single_sample_inference():
-                profile = self.hardware_profiling(x, HW="Systolic")
-                # with open("/home/zyzhao/lfw_opt/hardware_profiling.log", "a") as f:
-                #     f.write(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}\n")
-                print(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}")
+            # if self._is_single_sample_inference():
+            #     profile = self.hardware_profiling(x, HW="Systolic")
+            #     # with open("/home/zyzhao/lfw_opt/hardware_profiling.log", "a") as f:
+            #     #     f.write(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}\n")
+            #     print(f"Layer {self.layer_name}_{self.layer_idx} hardware profiling: {profile}")
             return self.quant_forward(x, stat_collector)
-        
         else:
             raise NotImplementedError(f"Mode {self.mode} not implemented")
     

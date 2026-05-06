@@ -236,7 +236,7 @@ def evaluate(args, config, model):
         start_time = time.time()
 
         # Single sample inference
-        input_text = "The quick brown fox jumps over the lazy dog."
+        input_text = "The quick brown fox jumps over the lazy dog. What will the dog do next?"
         inputs = tokenizer(input_text, return_tensors="pt").to(args.device)
         with torch.no_grad():
             outputs = model.generate(**inputs, max_length=50, do_sample=True, top_p=0.9)
@@ -254,6 +254,7 @@ def evaluate(args, config, model):
             "time": eval_time,
         }
 
+    print(f"generated_text : {generated_text}")
     print("\n" + "-" * 80)
     print("ZERO ACTIVATION RATIO")
     print("-" * 80)
